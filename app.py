@@ -4,6 +4,9 @@ from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
 from langchain_community.tools import ArxivQueryRun, WikipediaQueryRun, DuckDuckGoSearchResults
 from langchain.agents import initialize_agent, AgentType
 from langchain.callbacks import StreamlitCallbackHandler
+from langchain.chains import create_history_aware_retriever
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 
 # Creating Tools
 api_wrapper_wiki = WikipediaAPIWrapper(top_k_results=5, doc_content_chars_max=500)
@@ -20,9 +23,40 @@ st.title("Chat with Search!")
 st.sidebar.title("Settings")
 api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
 
+api_wrapper_wiki = WikipediaAPIWrapper(top_k_results=5, doc_content_chars_max=500)
+wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper_wiki)
+
+api_wrapper_arxiv = ArxivAPIWrapper(top_k_results=5, doc_content_chars_max=500)
+arxiv_tool = ArxivQueryRun(api_wrapper=api_wrapper_arxiv)
+
+search = DuckDuckGoSearchResults(name="Search")
+
+# Prompt template to contextualize questions
+contextualize_q_system_prompt = (
+    "Given a chat history and the latest user question "
+    "which might reference context in the chat history, "
+    "formulate a standalone question which can be understood "
+    "without the chat history. Do NOT answer the question, "
+    "just reformulate it if needed and otherwise return it as is."
+)
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+
+# Streamlit app
+st.title("Chat with Search!")
+
+st.sidebar.title("Settings")
+api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
+
 if not api_key:
     st.info("Please add your GROQ API key to continue!")
     st.stop()
+
 # Initialize session state for chat history
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
@@ -45,6 +79,14 @@ if prompt := st.chat_input(placeholder="Ask me anything..."):
         # Define tools
         tools = [search, arxiv_tool, wiki_tool]
 
+        # Create history-aware retriever
+        history_retriever = create_history_aware_retriever(
+            tools=tools,
+            llm=llm,
+            prompt=contextualize_q_prompt,
+            chat_history=st.session_state["messages"]
+        )
+
         # Initialize agent
         search_agent = initialize_agent(
             tools=tools,
@@ -58,7 +100,7 @@ if prompt := st.chat_input(placeholder="Ask me anything..."):
         with st.chat_message("assistant"):
             st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
             try:
-                response = search_agent.run(prompt, callbacks=[st_cb])
+                response = search_agent.run(prompt, callbacks=[st_cb], retriever=history_retriever)
             except Exception as e:
                 response = f"An error occurred: {str(e)}"
             st.session_state.messages.append({"role": "assistant", "content": response})
