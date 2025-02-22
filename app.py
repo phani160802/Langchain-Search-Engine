@@ -28,7 +28,7 @@ st.sidebar.title("Settings")
 api_key=st.sidebar.text_input("enter your Groq API key..",type='password')
 
 if not api_key:
-    st.info("Please add your GROQ API key to continue!)
+    st.info("Please add your GROQ API key to continue!")
     st.stop()
 if 'messages' not in st.session_state:
     st.session_state['messages']=[
