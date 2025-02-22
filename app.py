@@ -23,11 +23,10 @@ api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
 if not api_key:
     st.info("Please add your GROQ API key to continue!")
     st.stop()
-
 # Initialize session state for chat history
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "Hi, I am a chatbot who can search the web. How can I help you today?"}
+        {"role": "assistant", "content": "Hi, I can search the web, Wikipedia, and Arxiv for research papers. How can I help?"}
     ]
 
 # Display chat history
@@ -35,7 +34,7 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 # Handle user input
-if prompt := st.chat_input(placeholder="What is Machine Learning?"):
+if prompt := st.chat_input(placeholder="Ask me anything..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
@@ -51,13 +50,17 @@ if prompt := st.chat_input(placeholder="What is Machine Learning?"):
             tools=tools,
             llm=llm,
             agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=True  # Useful for debugging
+            verbose=True,  # Debugging
+            handle_parsing_errors=True  # Fixes parsing errors
         )
 
         # Run search and display response
         with st.chat_message("assistant"):
             st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-            response = search_agent.run(prompt, callbacks=[st_cb])
+            try:
+                response = search_agent.run(prompt, callbacks=[st_cb])
+            except Exception as e:
+                response = f"An error occurred: {str(e)}"
             st.session_state.messages.append({"role": "assistant", "content": response})
             st.write(response)
     else:
