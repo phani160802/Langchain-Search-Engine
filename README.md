@@ -1,4 +1,4 @@
-### 📚 Chat with Search!
+## 📚 Chat with Search!
 
 #### Overview
 This Streamlit application allows users to interactively search the web, Wikipedia, and ArXiv for research papers through a conversational interface. By leveraging the capabilities of LangChain and the Groq API, users can ask questions and receive responses sourced from multiple platforms, enhancing their research experience.
