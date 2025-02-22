@@ -55,9 +55,12 @@ if prompt := st.chat_input(placeholder="Ask me anything..."):
             handle_parsing_errors=True  # Fixes parsing errors
         )
 
-        # Prepare prompt with chat history
+        # Prepare prompt with limited chat history
+        message_limit = 5  # Limit the number of messages to keep in context
+        recent_messages = st.session_state.messages[-message_limit:]
+
         chat_history = "\n".join(
-            [f"{msg['role']}: {msg['content']}" for msg in st.session_state.messages]
+            [f"{msg['role']}: {msg['content']}" for msg in recent_messages]
         )
         full_prompt = f"{chat_history}\nuser: {prompt}\nassistant:"
 
