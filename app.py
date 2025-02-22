@@ -22,7 +22,7 @@ api_key = st.sidebar.text_input("Enter your Groq API key:", type="password")
 
 if not api_key:
     st.info("Please add your GROQ API key to continue!")
-    st.stop9()
+    st.stop()
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
