@@ -8,26 +8,6 @@ from langchain.chains import create_history_aware_retriever
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 
-# Creating Tools
-api_wrapper_wiki = WikipediaAPIWrapper(top_k_results=5, doc_content_chars_max=500)
-wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper_wiki)
-
-api_wrapper_arxiv = ArxivAPIWrapper(top_k_results=5, doc_content_chars_max=500)
-arxiv_tool = ArxivQueryRun(api_wrapper=api_wrapper_arxiv)
-
-search = DuckDuckGoSearchResults(name="Search")
-
-# Streamlit app
-st.title("Chat with Search!")
-
-st.sidebar.title("Settings")
-api_key = st.sidebar.text_input("Enter your Groq API key:", type="password", key="groq_api_key")
-
-if not api_key:
-    st.info("Please add your GROQ API key to continue!")
-    st.stop()
-
-
 api_wrapper_wiki = WikipediaAPIWrapper(top_k_results=5, doc_content_chars_max=500)
 wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper_wiki)
 
