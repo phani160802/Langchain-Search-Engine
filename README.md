@@ -19,6 +19,6 @@ This Streamlit application allows users to interactively search the web, Wikiped
 - DuckDuckGo – To perform web searches for additional information.
 
 #### 📖 How to Use
-Enter your Groq API Key in the sidebar to authenticate.
-Use the chat interface to ask questions or request information about research topics.
-The app will respond with information sourced from Wikipedia, ArXiv, and web searches.
+- Enter your Groq API Key in the sidebar to authenticate.
+- Use the chat interface to ask questions or request information about research topics.
+- The app will respond with information sourced from Wikipedia, ArXiv, and web searches.
